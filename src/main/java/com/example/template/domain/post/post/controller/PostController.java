@@ -7,6 +7,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import org.hibernate.validator.constraints.Length;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -48,11 +49,9 @@ public class PostController {
         posts.add(p3);
     }
 
-
     @GetMapping("/write")
-    @ResponseBody
     public String showWrite() {
-        return getFormHtml("", "", "");
+        return "domain/post/post/write";
     }
 
     @AllArgsConstructor
@@ -66,8 +65,11 @@ public class PostController {
         private String content;
     }
 
+
+    // @ResponseBody를 빼면 반환값을 템플릿으로 인식한다.
     @PostMapping("/write")
-    public String doWrite(@Valid WriteForm form, BindingResult bindingResult) {
+    public String doWrite(@Valid WriteForm form, BindingResult bindingResult,
+                          Model model) {
 
         if (bindingResult.hasErrors()) {
 
@@ -78,7 +80,9 @@ public class PostController {
                     .map(msg -> msg.split("-")[1])
                     .collect(Collectors.joining("<br>"));
 
-            return getFormHtml(errorMessage, form.getTitle(), form.getContent());
+            model.addAttribute("errorMessage", errorMessage);
+
+            return "domain/post/post/write";
         }
 
         Post post = Post.builder()
